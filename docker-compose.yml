@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17.5-alpine
+    container_name: postgres_laravel
+    restart: always
+    environment:
+      POSTGRES_USER: grva
+      POSTGRES_PASSWORD: grva89252
+      POSTGRES_DB: laraveldb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

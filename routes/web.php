@@ -25,3 +25,4 @@ Route::get('/', function () {
 
 // Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 // Route::post('/contact', [ContactController::class, 'send']);
+
