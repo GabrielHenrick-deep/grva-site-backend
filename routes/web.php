@@ -17,6 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::apiResource('members', MemberController::class)->except(['index', 'show']);
 
 
 // Route::get('/login', function () {
