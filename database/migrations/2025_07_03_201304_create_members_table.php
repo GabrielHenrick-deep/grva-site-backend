@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('cell')->nullable();
             $table->string('email')->nullable();
             $table->string('category')->nullable();
+            $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('pesquisa')->nullable();
             $table->string('lattes')->nullable();
             $table->string('linkedin')->nullable();

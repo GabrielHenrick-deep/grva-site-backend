@@ -1,50 +1,61 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Requests\StoreMembersRequest;
 use App\Http\Requests\UpdateMembersRequest;
 use App\Models\Member;
+use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
     public function index()
     {
-        return Member::with('projects')->get();
+        $members = Member::with('project')->get();
+        return response()->json($members);
     }
 
-   public function store(\Illuminate\Http\Request $request) 
+public function store(Request $request)
     {
         try {
-            $member = Member::create($request->all());
+            $data = $request->except('foto');
+
+            if ($request->hasFile('foto')) {
+                $caminho = $request->file('foto')->store('members', 'public');
+                $data['foto'] = asset('storage/' . $caminho);
+            }
+
+            $member = Member::create($data);
+
             return response()->json($member, 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
     public function show(Member $member)
     {
-    
-        $member->load('projects'); // Carrega os projetos relacionados
+        $member->load('project');
 
         return response()->json($member);
     }
-
-// Mude de UpdateMembersRequest para Request
     public function update(\Illuminate\Http\Request $request, Member $member)
     {
         try {
-            $member->update($request->all());
+            $data = $request->except('foto');
+            if ($request->hasFile('foto')) {
+                $caminho = $request->file('foto')->store('uploadMembers', 'public');
+                $data['foto'] = asset('storage/' . $caminho);
+            } else {
+                unset($data['foto']);
+            }
+
+            $member->update($data);
+
             return response()->json($member, 200);
         } catch (\Exception $e) {
-            // Isso vai retornar o erro real para o seu console do navegador
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 
     public function destroy(Member $member)
     {

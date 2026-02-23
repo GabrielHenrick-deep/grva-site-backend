@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
+
     public function index()
     {
-        // return Project::all();
-        return Project::with('members')->get();
+        $project = Project::with('member')->get();
+        return response()->json($project);
     }
 
     public function store(Request $request)
@@ -40,10 +41,11 @@ class ProjectController extends Controller
         return response()->json($project, 201);
     }
 
-    public function show($id)
+    public function show(Project $project)
     {
-        // return Project::findOrFail($id);
-        return Project::with('members')->findOrFail($id);
+        $project->load('member');
+
+        return response()->json($project);
     }
 
     public function update(Request $request, $id)

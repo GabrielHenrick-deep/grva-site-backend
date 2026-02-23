@@ -27,8 +27,7 @@ class MemberProjectSeeder extends Seeder
         usort($rows, function ($a, $b) {
             return strcmp($a[0], $b[0]);
         });
-        
-        // URL da imagem padrão para projetos
+
         $defaultProjectImageUrl = 'http://localhost:8000/storage/projects/Wallpaper_B.png';
 
         foreach ($rows as $row) {
@@ -37,20 +36,10 @@ class MemberProjectSeeder extends Seeder
             $slugName = Str::slug($row[0], '_');
             $fotoUrl = "http://localhost:8000/storage/members/{$slugName}.jpg";
 
-            $member = Member::create([
-                'name'     => $row[0],
-                'foto'     => $fotoUrl,
-                'cell'     => $row[2],
-                'email'    => $row[3],
-                'category' => $row[4],
-                'pesquisa' => $row[5],
-                'lattes'   => $row[6],
-                'linkedin' => $row[7],
-                'orcid'    => $row[8],
-                'link'     => $row[9],
-            ]);
-
             $titulo = trim($row[10] ?? '');
+            $project = null;
+
+            // 1. PRIMEIRO: Lidamos com o Projeto
             if (!empty($titulo)) {
                 $artigosBrutos = explode("\n", str_replace("\r", "", $row[14] ?? ''));
                 $artigos = array_map(function ($line) {
@@ -62,21 +51,45 @@ class MemberProjectSeeder extends Seeder
                 }, array_filter($artigosBrutos));
 
                 $imagePath = storage_path("app/public/projects/{$slugName}.png");
-
-                // Verifica se a imagem do projeto existe, senão, usa a padrão
                 $imageUrl = file_exists($imagePath)
                     ? "http://localhost:8000/storage/projects/{$slugName}.png"
                     : $defaultProjectImageUrl;
 
-                $project = Project::create([
-                    'title'     => $row[10] ?? '',
-                    'resumo'    => $row[11] ?? '',
-                    'image_url' => $imageUrl,
-                    'video'     => $row[13] ?? null,
-                    'artigo'    => $artigos,
-                ]);
+                // Usamos firstOrCreate para não criar projetos duplicados
+                // caso vários membros no CSV pertençam ao mesmo projeto
+                $project = Project::firstOrCreate(
+                    ['title' => $titulo], // Busca por esse título
+                    [ // Se não achar, cria com esses dados adicionais
+                        'resumo'    => $row[11] ?? '',
+                        'image_url' => $imageUrl,
+                        'video'     => $row[13] ?? null,
+                        'artigo'    => $artigos,
+                    ]
+                );
+            }
 
-                $member->projects()->attach([$project->id]);
+            // 2. SEGUNDO: Preparamos os dados do Membro
+            $memberData = [
+                'name'     => $row[0],
+                'foto'     => $fotoUrl,
+                'cell'     => $row[2],
+                'email'    => $row[3],
+                'category' => $row[4],
+                'pesquisa' => $row[5],
+                'lattes'   => $row[6],
+                'linkedin' => $row[7],
+                'orcid'    => $row[8],
+                'link'     => $row[9],
+            ];
+
+            // 3. TERCEIRO: Criamos o Membro
+            if ($project) {
+                // Se existe um projeto, criamos o membro a partir da relação do projeto
+                // Isso vai preencher automaticamente o 'project_id' na tabela members
+                $project->member()->create($memberData);
+            } else {
+                // Se esse membro não tem projeto no CSV, criamos ele "solto"
+                Member::create($memberData);
             }
         }
     }

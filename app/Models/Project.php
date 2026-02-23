@@ -5,11 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Member;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
     use HasFactory;
-    
+
+    public function member(): HasMany
+    {
+        return $this->hasMany(Member::class);
+    }
+
     protected $fillable = [
         'title',
         'resumo',
@@ -23,10 +29,5 @@ class Project extends Model
     protected $casts = [
         'artigo' => 'array',
     ];
-   public function members()
-    {
-        return $this->belongsToMany(Member::class, 'member_project', 'project_id', 'member_id');
-    }
-
 
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Member extends Model
 {
@@ -21,12 +22,13 @@ class Member extends Model
         'linkedin',
         'orcid',
         'link',
+        'project_id'
     ];
 
 
-    public function projects()
+    public function project(): BelongsTo
     {
-        return $this->belongsToMany(Project::class, 'member_project', 'member_id', 'project_id');
+        return $this->belongsTo(Project::class);
     }
-     
+
 }
