@@ -44,7 +44,7 @@ Route::apiResource('members', MemberController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('projects', ProjectController::class)->except(['index', 'show']);
     Route::apiResource('publications', PublicationController::class)->except(['index', 'show']);
-    
+
     Route::post('/import-members', [AdminCsvImportController::class, 'import']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
